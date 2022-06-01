@@ -10,8 +10,8 @@ class Main():
  
         pygame.display.set_caption("Kerää kolikot")
  
-        self.fontti_pieni = pygame.font.SysFont("Segoe UI", 24)
-        self.fontti_suuri = pygame.font.SysFont("Segoe UI", 50)
+        self.fontti_pieni = pygame.font.SysFont("Segoe UI", 24, bold=True)
+        self.fontti_suuri = pygame.font.SysFont("Segoe UI", 50, bold=True)
 
         self.leveys, self.korkeus = 640, 480
         self.naytto = pygame.display.set_mode((self.leveys, self.korkeus))
@@ -48,6 +48,16 @@ class Main():
                     self.oikealle = True
                 if tapahtuma.key == pygame.K_LEFT:
                     self.vasemmalle = True
+                if tapahtuma.key == pygame.K_ESCAPE:
+                    self.lopetusnaytto()      
+                if tapahtuma.key == pygame.K_SPACE:
+                    if self.lataa == False and self.ammukset >= 1:
+                        self.luoti_x = self.sijainti_x
+                        self.luoti_y = self.sijainti_y
+                        self.ammu_luoti(self.luoti_x, self.luoti_y)
+                        if self.ammukset >= 1:
+                            self.ammukset -= 1
+                            self.laser_aani.play()
  
             if tapahtuma.type == pygame.KEYUP:
                 if tapahtuma.key == pygame.K_RIGHT:
@@ -63,7 +73,7 @@ class Main():
                     if self.ammukset >= 1:
                         self.ammukset -= 1
                         self.laser_aani.play()
-            
+   
             if tapahtuma.type == pygame.QUIT:
                 self.lopetusnaytto()
  
@@ -146,19 +156,34 @@ class Main():
             self.naytto.blit(self.kuvat[2], (kolikko[0], kolikko[1]))
  
     def lopetusnaytto(self):
-
         pisteet = self.fontti_suuri.render("Kerätyt kolikot: " + str(self.pisteet), True, (255, 255, 255))
         paras_tulos = self.fontti_suuri.render("Paras tulos: " + str(self.tiedosto()), True, (255, 255, 255))
+        pelaa_uudestaan_valkoinen = self.fontti_suuri.render("Pelaa uudestaan", True, (255, 255, 255))
+        pelaa_uudestaan_musta = self.fontti_suuri.render("Pelaa uudestaan", True, (0, 0, 0))
 
+        teksti = pelaa_uudestaan_valkoinen.get_rect(center = (self.leveys / 2, self.korkeus / 1.6))
+    
         while True:
             for tapahtuma in pygame.event.get():
+                if tapahtuma.type == pygame.KEYDOWN:
+                    if tapahtuma.key == pygame.K_ESCAPE:
+                        exit()
+
+                if tapahtuma.type == pygame.MOUSEBUTTONDOWN and teksti.collidepoint(pygame.mouse.get_pos()):
+                    Main()
+
                 if tapahtuma.type == pygame.QUIT:
                     exit()
 
             self.naytto.fill((105, 105, 105))
-
+        
             self.naytto.blit(pisteet, (self.leveys / 2 - pisteet.get_width() / 2, self.korkeus / 2 - pisteet.get_height()))
             self.naytto.blit(paras_tulos, (self.leveys / 2 - paras_tulos.get_width() / 2, self.korkeus / 3 - pisteet.get_height()))
+
+            if teksti.collidepoint(pygame.mouse.get_pos()):
+                self.naytto.blit(pelaa_uudestaan_musta, (self.leveys / 2 - pelaa_uudestaan_musta.get_width() / 2, self.korkeus / 1.5 - pelaa_uudestaan_musta.get_height()))
+            else:
+                self.naytto.blit(pelaa_uudestaan_valkoinen, (self.leveys / 2 - pelaa_uudestaan_valkoinen.get_width() / 2, self.korkeus / 1.5 - pelaa_uudestaan_valkoinen.get_height()))
 
             pygame.display.flip()
 
@@ -198,7 +223,7 @@ class Main():
         self.naytto.blit(self.kuvat[0], (self.sijainti_x, self.sijainti_y))
         self.naytto.blit(pisteet, ((self.leveys - 30) - pisteet.get_width(), 0))
         self.naytto.blit(ammukset, ((self.leveys - 30) - ammukset.get_width(), ammukset.get_height()))
- 
+        
         if self.luoti_y <= 0:
             self.luoti_y = 480
             self.lataa = False
@@ -217,3 +242,4 @@ class Main():
 if __name__ == "__main__":
 
     Main()
+
